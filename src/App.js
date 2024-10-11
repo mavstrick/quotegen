@@ -1,27 +1,62 @@
-import React, { useState } from 'react';
-
-const quotes = [
-  { quote: "The only limit to our realization of tomorrow is our doubts of today.", author: "Franklin D. Roosevelt" },
-  { quote: "In the end, it's not the years in your life that count. It's the life in your years.", author: "Abraham Lincoln" },
-  { quote: "Life is 10% what happens to us and 90% how we react to it.", author: "Charles R. Swindoll" },
-  { quote: "The purpose of our lives is to be happy.", author: "Dalai Lama" },
-  { quote: "Get busy living or get busy dying.", author: "Stephen King" }
-];
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function App() {
-  const [quote, setQuote] = useState(quotes[0]);
+  const [quote, setQuote] = useState("");
+  const [error, setError] = useState(null);
 
-  const getRandomQuote = () => {
-    const randomIndex = Math.floor(Math.random() * quotes.length);
-    setQuote(quotes[randomIndex]);
+  // Fetch a random quote from the RapidAPI
+  const fetchQuote = async () => {
+    const options = {
+      method: 'GET',
+      url: 'https://quotes15.p.rapidapi.com/quotes/random/',
+      params: {
+        language_code: 'en'
+      },
+      headers: {
+        'x-rapidapi-key': 'c4294403f0mshc119beaa46895bcp1ec888jsned724f5d3fbc',
+        'x-rapidapi-host': 'quotes15.p.rapidapi.com'
+      }
+    };
+
+    try {
+      const response = await axios.request(options);
+      console.log(response.data);
+      setQuote(response.data.content)
+    } catch (error) {
+      console.error(error);
+    }
   };
+
+  // Fetch quote once when the component mounts
+  useEffect(() => {
+    fetchQuote();
+  }, []);
 
   return (
     <div style={{ textAlign: 'center', padding: '50px' }}>
-      <h1>Random Quote Generator</h1>
-      <div style={{ fontStyle: 'italic', marginBottom: '10px' }}>"{quote.quote}"</div>
-      <div style={{ marginBottom: '20px' }}>- {quote.author}</div>
-      <button onClick={getRandomQuote} style={{ padding: '10px 20px', fontSize: '16px' }}>Get New Quote</button>
+      <h1>Dynamic Random Quote Generator</h1>
+
+      {error ? (
+        <div style={{ color: 'red', marginBottom: '20px' }}>{error}</div>
+      ) : (
+        <>
+          <div style={{ fontStyle: 'italic', marginBottom: '10px' }}>"{quote.content}"</div>
+          <div style={{ marginBottom: '20px' }}>- {quote.author}</div>
+        </>
+      )}
+     <div style={{display:"flex", flexDirection:"column"}}>
+  <button
+    onClick={fetchQuote} // Fetch a new quote when the button is clicked
+    style={{ padding: '10px 20px', fontSize: '16px' }}
+  >
+    Get New Quote
+  </button>
+  <p>
+    {quote}
+  </p>
+</div>
+
     </div>
   );
 }
